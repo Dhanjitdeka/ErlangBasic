@@ -100,6 +100,30 @@ http://localhost:8080
 - **8080**: HTTP server (serves frontend)
 - **8081**: WebSocket server (real-time messaging)
 
+## 🌐 GitHub Pages Demo
+
+Want to try the app without installing Erlang? We've got you covered!
+
+**[Try the Live Demo →](https://dhanjitdeka.github.io/ErlangBasic/)** *(Once deployed)*
+
+The demo version runs entirely in your browser with simulated backend functionality. Perfect for:
+- Quick preview of the UI/UX
+- Testing the frontend without server setup
+- Sharing with others easily
+
+**Note:** The demo mode simulates chat functionality but doesn't provide real-time messaging between users. For the full experience with Erlang's concurrency, run the server locally!
+
+### Deploying to GitHub Pages
+
+This repository includes a `docs/` folder ready for GitHub Pages deployment:
+
+1. Go to **Settings** → **Pages** on GitHub
+2. Select **Deploy from a branch**
+3. Choose `main` branch and `/docs` folder
+4. Your demo will be live at `https://[username].github.io/ErlangBasic/`
+
+See [docs/README.md](docs/README.md) for more details.
+
 ## 📖 How It Works
 
 ### User Connection Flow
