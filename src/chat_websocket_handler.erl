@@ -179,7 +179,7 @@ process_websocket_message(MessageBinary, _Socket, CurrentUsername) ->
                 CurrentUsername
         end
     catch
-        _:Error:Stack ->
+        error:Error:Stack ->
             io:format("Error processing message: ~p~nStack: ~p~n", [Error, Stack]),
             CurrentUsername
     end.

@@ -3,7 +3,17 @@
 -module(chat_http_server).
 -export([start/1, stop/0]).
 
--define(STATIC_DIR, "/home/runner/work/ErlangBasic/ErlangBasic/priv/static").
+%% @doc Get the static directory path
+%% Uses relative path from the application root
+get_static_dir() ->
+    %% Get the application directory
+    case code:priv_dir(erlang_chat) of
+        {error, bad_name} ->
+            %% Fallback to relative path if app not found
+            filename:join([filename:dirname(code:which(?MODULE)), "..", "priv", "static"]);
+        PrivDir ->
+            filename:join(PrivDir, "static")
+    end.
 
 %% @doc Start HTTP server on specified port
 start(Port) ->
@@ -12,12 +22,16 @@ start(Port) ->
     %% Start inets application
     application:start(inets),
     
+    %% Get static directory
+    StaticDir = get_static_dir(),
+    io:format("Serving static files from: ~s~n", [StaticDir]),
+    
     %% Configure and start httpd
     Config = [
         {port, Port},
         {server_name, "chat_server"},
         {server_root, "/tmp"},
-        {document_root, ?STATIC_DIR},
+        {document_root, StaticDir},
         {bind_address, {0,0,0,0}},
         {modules, [mod_alias, mod_dir, mod_get, mod_log]},
         {directory_index, ["index.html"]},

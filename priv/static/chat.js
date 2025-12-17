@@ -88,8 +88,14 @@ class ChatClient {
      */
     connect() {
         try {
-            // Connect to WebSocket on port 8081
-            this.ws = new WebSocket('ws://localhost:8081');
+            // Connect to WebSocket - use current host for production
+            // For development, defaults to localhost:8081
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.hostname || 'localhost';
+            const wsUrl = `${protocol}//${host}:8081`;
+            
+            console.log('Connecting to WebSocket:', wsUrl);
+            this.ws = new WebSocket(wsUrl);
             
             this.ws.onopen = () => this.handleConnectionOpen();
             this.ws.onmessage = (event) => this.handleMessage(event);

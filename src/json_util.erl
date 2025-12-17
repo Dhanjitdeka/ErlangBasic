@@ -112,7 +112,14 @@ parse_number(String, Acc) ->
             Num = try
                 list_to_integer(NumStr)
             catch
-                _:_ -> list_to_float(NumStr)
+                error:badarg ->
+                    try
+                        list_to_float(NumStr)
+                    catch
+                        error:badarg ->
+                            %% Invalid number format, return 0 as fallback
+                            0
+                    end
             end,
             {Num, String}
     end.
