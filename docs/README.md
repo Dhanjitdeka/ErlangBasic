@@ -62,6 +62,13 @@ Once deployed, you can share the GitHub Pages URL to let anyone try the demo wit
 
 Example: `https://dhanjitdeka.github.io/ErlangBasic/`
 
+## Additional Resources
+
+- **[QUICKSTART.md](QUICKSTART.md)** - Compare demo vs full application
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Detailed deployment instructions
+- **[Main README](../README.md)** - Full application documentation
+- **[Architecture Guide](../ARCHITECTURE.md)** - System design details
+
 ## Limitations of Demo Mode
 
 Since GitHub Pages only hosts static files, the demo mode:
