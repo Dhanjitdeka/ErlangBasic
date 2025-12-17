@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp-like Chat App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="login-box">
+                <h1>🗨️ WhatsApp-like Chat</h1>
+                <p>Built with Erlang & Vanilla JavaScript</p>
+                <input type="text" id="username-input" placeholder="Enter your username" maxlength="20" />
+                <button id="join-button">Join Chat</button>
+                <div id="login-error" class="error"></div>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="screen">
+            <div class="chat-container">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <h2>Online Users</h2>
+                        <span id="user-count" class="badge">0</span>
+                    </div>
+                    <div id="users-list" class="users-list">
+                        <!-- Users will be added here dynamically -->
+                    </div>
+                    <div class="current-user">
+                        <span id="current-username">You</span>
+                        <button id="logout-button" class="btn-secondary">Logout</button>
+                    </div>
+                </div>
+
+                <!-- Main Chat Area -->
+                <div class="main-chat">
+                    <div class="chat-header">
+                        <h2>💬 General Room</h2>
+                        <span class="status" id="connection-status">Connecting...</span>
+                    </div>
+                    <div id="messages-container" class="messages-container">
+                        <!-- Messages will be added here dynamically -->
+                    </div>
+                    <div class="message-input-container">
+                        <input 
+                            type="text" 
+                            id="message-input" 
+                            placeholder="Type a message..." 
+                            maxlength="500"
+                        />
+                        <button id="send-button" disabled>Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>
