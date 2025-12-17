@@ -1,0 +1,13 @@
+# GitHub Pages Configuration
+
+# Site settings
+title: WhatsApp-like Chat Application
+description: Real-time chat application built with Erlang backend and vanilla JavaScript frontend
+baseurl: "/ErlangBasic"
+url: "https://dhanjitdeka.github.io"
+
+# Build settings
+markdown: kramdown
+exclude:
+  - README.md
+  - DEPLOYMENT.md
