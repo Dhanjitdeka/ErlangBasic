@@ -37,7 +37,7 @@ init(Socket) ->
     %% Perform WebSocket handshake
     case do_handshake(Socket) of
         ok ->
-            io:format("WebSocket connection established~n", []),
+            io:format("WebSocket connection established, entering message loop~n", []),
             %% Enter message loop
             handle_messages(Socket, undefined);
         {error, Reason} ->
@@ -47,16 +47,21 @@ init(Socket) ->
 
 %% @doc Handle incoming WebSocket messages
 handle_messages(Socket, Username) ->
+    io:format("Setting socket to active once (Username: ~p)~n", [Username]),
     inet:setopts(Socket, [{active, once}]),
+    io:format("Waiting for messages...~n", []),
     receive
         {tcp, Socket, Data} ->
+            io:format("Received TCP data (length ~p): ~p~n", [byte_size(Data), Data]),
             %% Decode WebSocket frame
             case decode_frame(Data) of
                 {ok, Message} ->
+                    io:format("Decoded frame message: ~p~n", [Message]),
                     %% Process message
                     NewUsername = process_websocket_message(Message, Socket, Username),
                     handle_messages(Socket, NewUsername);
-                {error, _Reason} ->
+                {error, Reason} ->
+                    io:format("Frame decode error: ~p~n", [Reason]),
                     handle_messages(Socket, Username)
             end;
         
@@ -83,7 +88,11 @@ handle_messages(Socket, Username) ->
             gen_tcp:close(Socket);
         
         stop ->
-            gen_tcp:close(Socket)
+            gen_tcp:close(Socket);
+        
+        Other ->
+            io:format("Received unexpected message: ~p~n", [Other]),
+            handle_messages(Socket, Username)
     end.
 
 %% @doc Process incoming WebSocket message
@@ -91,12 +100,28 @@ process_websocket_message(MessageBinary, _Socket, CurrentUsername) ->
     try
         %% Parse JSON message
         Message = json_util:decode(MessageBinary),
-        Type = maps:get(<<"type">>, Message, <<"unknown">>),
+        io:format("Decoded message: ~p~n", [Message]),
+        
+        TypeRaw = maps:get(<<"type">>, Message, "unknown"),
+        %% Convert to binary if it's a list
+        Type = case TypeRaw of
+            L when is_list(L) -> list_to_binary(L);
+            B when is_binary(B) -> B;
+            _ -> <<"unknown">>
+        end,
+        
+        io:format("Message type: ~p~n", [Type]),
         
         case Type of
             <<"join">> ->
                 %% User joining the chat
-                Username = binary_to_list(maps:get(<<"username">>, Message)),
+                UsernameRaw = maps:get(<<"username">>, Message),
+                Username = case UsernameRaw of
+                    ListVal when is_list(ListVal) -> ListVal;
+                    BinVal when is_binary(BinVal) -> binary_to_list(BinVal)
+                end,
+                io:format("User joining: ~p~n", [Username]),
+                
                 case chat_user_manager:register_user(Username, self()) of
                     {ok, registered} ->
                         %% Join default room
@@ -108,6 +133,7 @@ process_websocket_message(MessageBinary, _Socket, CurrentUsername) ->
                             username => list_to_binary(Username),
                             room => <<"general">>
                         }),
+                        io:format("Sending join success: ~p~n", [Response]),
                         self() ! {send, Response},
                         
                         Username;
@@ -126,8 +152,17 @@ process_websocket_message(MessageBinary, _Socket, CurrentUsername) ->
                     undefined ->
                         CurrentUsername;
                     _ ->
-                        Content = binary_to_list(maps:get(<<"content">>, Message)),
-                        Room = binary_to_list(maps:get(<<"room">>, Message, <<"general">>)),
+                        ContentRaw = maps:get(<<"content">>, Message),
+                        Content = case ContentRaw of
+                            ContentList when is_list(ContentList) -> ContentList;
+                            ContentBin when is_binary(ContentBin) -> binary_to_list(ContentBin)
+                        end,
+                        
+                        RoomRaw = maps:get(<<"room">>, Message, "general"),
+                        Room = case RoomRaw of
+                            RoomList when is_list(RoomList) -> RoomList;
+                            RoomBin when is_binary(RoomBin) -> binary_to_list(RoomBin)
+                        end,
                         
                         chat_message_router:route_message(#{
                             type => room_message,
@@ -144,8 +179,8 @@ process_websocket_message(MessageBinary, _Socket, CurrentUsername) ->
                 CurrentUsername
         end
     catch
-        _:Error ->
-            io:format("Error processing message: ~p~n", [Error]),
+        _:Error:Stack ->
+            io:format("Error processing message: ~p~nStack: ~p~n", [Error, Stack]),
             CurrentUsername
     end.
 
@@ -168,6 +203,9 @@ do_handshake(Socket) ->
                         "\r\n"
                     ],
                     gen_tcp:send(Socket, Response),
+                    io:format("WebSocket handshake complete, setting socket to binary mode~n", []),
+                    % Ensure socket is in binary mode
+                    inet:setopts(Socket, [binary, {packet, 0}, {active, false}]),
                     ok;
                 {error, Reason} ->
                     {error, Reason}

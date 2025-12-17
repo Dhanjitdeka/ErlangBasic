@@ -1,7 +1,7 @@
 %%% @doc HTTP Server - serves static files and handles WebSocket upgrades
 %%% Uses Erlang's built-in inets/httpd for HTTP serving.
 -module(chat_http_server).
--export([start/1, stop/0, handle_request/3]).
+-export([start/1, stop/0]).
 
 -define(STATIC_DIR, "/home/runner/work/ErlangBasic/ErlangBasic/priv/static").
 
@@ -18,13 +18,18 @@ start(Port) ->
         {server_name, "chat_server"},
         {server_root, "/tmp"},
         {document_root, ?STATIC_DIR},
-        {modules, [?MODULE]},
+        {bind_address, {0,0,0,0}},
+        {modules, [mod_alias, mod_dir, mod_get, mod_log]},
+        {directory_index, ["index.html"]},
         {mime_types, [
             {"html", "text/html"},
             {"css", "text/css"},
             {"js", "application/javascript"},
-            {"ico", "image/x-icon"}
-        ]}
+            {"ico", "image/x-icon"},
+            {"json", "application/json"}
+        ]},
+        {error_log, "/tmp/httpd_error.log"},
+        {transfer_log, "/tmp/httpd_access.log"}
     ],
     
     case inets:start(httpd, Config) of
@@ -39,10 +44,3 @@ start(Port) ->
 %% @doc Stop HTTP server
 stop() ->
     inets:stop().
-
-%% @doc Handle incoming HTTP requests
-%% This is called by inets for each request
-handle_request(SessionID, _Env, Input) ->
-    %% For now, we'll let inets handle file serving
-    %% WebSocket handling will be added via a separate module
-    mod_get:do(SessionID, Input).

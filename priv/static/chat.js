@@ -215,7 +215,11 @@ class ChatClient {
      */
     sendToServer(data) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(data));
+            const jsonData = JSON.stringify(data);
+            console.log('Sending to server:', jsonData);
+            this.ws.send(jsonData);
+        } else {
+            console.error('WebSocket not ready. State:', this.ws ? this.ws.readyState : 'no ws');
         }
     }
 
